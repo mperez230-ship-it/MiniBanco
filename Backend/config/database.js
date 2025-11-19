@@ -1,39 +1,59 @@
-const { Sequelize } = require("sequelize");
-require("dotenv").config();
+const { Sequelize } = require('sequelize');
+require('dotenv').config();
 
-// Prioriza URI (Railway public URL) y hace fallback a variables separadas.
-// Acepta varios nombres comunes de variables de entorno (Railway / Render / DB_*)
-const DB_URL = process.env.MYSQL_URL || process.env.MYSQL_PUBLIC_URL || process.env.DATABASE_URL || process.env.MYSQL_URI;
+// Prioridad y detección
+const RAW_DB_URL = process.env.MYSQL_URL || process.env.MYSQL_PUBLIC_URL || process.env.DATABASE_URL || process.env.MYSQL_URI;
 
-const DB_NAME = process.env.MYSQLDATABASE || process.env.MYSQL_DATABASE || process.env.DB_NAME || process.env.DATABASE;
-const DB_USER = process.env.MYSQLUSER || process.env.MYSQL_USER || process.env.DB_USER;
-const DB_PASS = process.env.MYSQLPASSWORD || process.env.MYSQL_ROOT_PASSWORD || process.env.DB_PASS || process.env.DB_PASSWORD;
-const DB_HOST = process.env.MYSQLHOST || process.env.MYSQL_HOST || process.env.DB_HOST || "localhost";
-const DB_PORT = process.env.MYSQLPORT || process.env.MYSQL_PORT || process.env.DB_PORT || 3306;
+// Vars locales / por defecto
+const LOCAL_DB_NAME = process.env.DB_NAME || 'minibanco_sql';
+const LOCAL_DB_USER = process.env.DB_USER || 'root';
+const LOCAL_DB_PASS = process.env.DB_PASS ?? 'tqvHyrOUGoouJRxefYpmdjyqgJbzOnCR';
+const LOCAL_DB_HOST = process.env.DB_HOST || 'mysql.railway.internal';
+const LOCAL_DB_PORT = Number(process.env.DB_PORT || 3306);
 
-console.log(">>> DEBUG DB CONFIG (Render + Railway):", {
-  DB_URL: DB_URL ? "*** (uri presente)" : "(vacía)",
-  DB_NAME,
-  DB_USER,
-  DB_PASS: DB_PASS ? "***" : "(VACÍO)",
-  DB_HOST,
-  DB_PORT
-});
+// Forzar modo local si se desea
+const FORCE_LOCAL = (String(process.env.USE_LOCAL_DB || '').toLowerCase() === 'true');
+
+// Determinar entorno (considera 'development' como local)
+const IS_DEV = process.env.NODE_ENV === 'development';
+
+// Decidir usar DB_URL o variables locales:
+// - Si FORCE_LOCAL === true -> usar local
+// - Si RAW_DB_URL existe y no estamos forzando local y no estamos en dev -> usar RAW_DB_URL
+// - Si RAW_DB_URL no existe -> usar local
+const useLocal = FORCE_LOCAL || !RAW_DB_URL || IS_DEV;
+const DB_URL = RAW_DB_URL;
+
+console.log('>>> DB CONFIG DECISION:', { IS_DEV, FORCE_LOCAL, hasRawUrl: !!RAW_DB_URL, useLocal });
+
+if (useLocal) {
+  console.log('>>> DEBUG DB CONFIG: usando configuración LOCAL', {
+    DB_NAME: LOCAL_DB_NAME,
+    DB_USER: LOCAL_DB_USER,
+    DB_PASS: LOCAL_DB_PASS === '' ? '(VACÍO)' : '***',
+    DB_HOST: LOCAL_DB_HOST,
+    DB_PORT: LOCAL_DB_PORT
+  });
+} else {
+  console.log('>>> DEBUG DB CONFIG: usando DB_URL (ocultando credenciales)', {
+    DB_URL: DB_URL ? '*** (uri presente)' : '(vacía)'
+  });
+}
 
 let sequelize;
-if (DB_URL) {
-  // Usar URI completa cuando esté disponible (recomendado)
+if (!useLocal && DB_URL) {
+  // Usar URI completa cuando esté disponible y no se esté forzando local
   sequelize = new Sequelize(DB_URL, {
-    dialect: "mysql",
+    dialect: 'mysql',
     logging: false,
     pool: { max: 5, min: 0, acquire: 30000, idle: 10000 }
   });
 } else {
-  // Fallback a variables separadas
-  sequelize = new Sequelize(DB_NAME, DB_USER, DB_PASS, {
-    host: DB_HOST,
-    port: DB_PORT,
-    dialect: "mysql",
+  // Usar configuración local
+  sequelize = new Sequelize(LOCAL_DB_NAME, LOCAL_DB_USER, LOCAL_DB_PASS, {
+    host: LOCAL_DB_HOST,
+    port: LOCAL_DB_PORT,
+    dialect: 'mysql',
     logging: false,
     pool: { max: 5, min: 0, acquire: 30000, idle: 10000 }
   });
