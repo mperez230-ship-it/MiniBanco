@@ -1,0 +1,79 @@
+/* style.css - diseño simple para MiniBanco */
+:root{
+  --bg:#133a6b;
+  --card:#ffffff;
+  --accent:#1e3c72;
+  --muted:#777;
+  --success:#2e8b57;
+  --danger:#d9534f;
+}
+
+*{box-sizing:border-box;font-family:Segoe UI, Roboto, Arial, sans-serif}
+body{margin:0;background:linear-gradient(180deg,#123a66 0%, #1b4a8a 100%);color:#222;min-height:100vh}
+.container{max-width:1200px;margin:25px auto;padding:20px}
+header{color:#fff;margin-bottom:20px}
+header h1{margin:0;font-size:28px}
+header p{margin:6px 0 0;color: #d0e4ff}
+
+.main-layout{display:flex;gap:20px}
+.sidebar{width:320px}
+.card{background:var(--card);border-radius:10px;padding:18px;margin-bottom:18px;box-shadow: 0 6px 18px rgba(0,0,0,0.12)}
+.content-card{flex:1;padding:24px;min-height:600px}
+
+h2{margin:0 0 12px;color:var(--accent);display:flex;align-items:center;gap:8px}
+.form-group{margin-bottom:12px}
+.form-group label{display:block;margin-bottom:6px;font-size:0.95em;color:#333}
+.form-group input[type="text"], .form-group input[type="password"], .form-group input[type="number"], .form-group select{
+  width:100%;padding:10px;border-radius:6px;border:1px solid #dce6f6;background:#f6f9ff;
+}
+.btn{display:inline-block;padding:10px 16px;border-radius:8px;border:0;color:#fff;cursor:pointer;font-weight:600}
+.btn-primary{background:var(--accent)}
+.btn-success{background:var(--success)}
+.btn-danger{background:var(--danger)}
+.btn-info{background:#17a2b8}
+.btn-small{padding:6px 10px;font-size:0.9em;border-radius:6px}
+
+.empty-state{padding:40px 20px;text-align:center;color:#7b8fae}
+
+.users-list-item{display:flex;justify-content:space-between;align-items:center;padding:8px 10px;border-radius:6px;background:#f8f9fb;margin-bottom:8px}
+
+.account-card{border:1px solid #e6eefc;padding:12px;border-radius:8px;margin-bottom:12px}
+.account-header{display:flex;justify-content:space-between;align-items:center}
+.account-id{font-weight:700}
+.account-type{padding:4px 8px;border-radius:6px;background:#eef6ff;color:#1e3c72}
+.account-balance{font-size:1.3em;font-weight:700;margin:10px 0}
+
+.account-actions button{margin-right:6px;margin-top:6px}
+
+.tabs{display:flex;gap:8px;margin:12px 0 18px}
+.tab{padding:8px 12px;border-radius:6px;background:#f3f6fb;border:1px solid #e3eefb;cursor:pointer}
+.tab.active{background:var(--accent);color:#fff}
+
+.tab-content{display:none}
+.tab-content.active{display:block}
+
+.transaction{display:flex;justify-content:space-between;align-items:center;padding:10px;border-radius:8px;margin-bottom:8px;background:#fff;box-shadow:0 2px 8px rgba(0,0,0,0.03)}
+.transaction.positive{border-left:4px solid #2e8b57}
+.transaction.negative{border-left:4px solid #d9534f}
+.transaction-amount.positive{color:#2e8b57;font-weight:700}
+.transaction-amount.negative{color:#d9534f;font-weight:700}
+
+.stats-grid{display:flex;gap:12px}
+.stat-card{background:#f7fbff;padding:12px;border-radius:8px;flex:1;text-align:center}
+.stat-number{font-size:1.6em;font-weight:700;color:var(--accent)}
+.stat-label{color:var(--muted)}
+
+.alert{position:fixed;left:20px;right:20px;top:20px;padding:12px;border-radius:8px;z-index:999;opacity:0.98}
+.alert-info{background:#e7f3ff;color:#0b4a83;border-left:6px solid #1e3c72}
+.alert-success{background:#e9ffef;color:#166b42;border-left:6px solid #2e8b57}
+.alert-error{background:#ffecec;color:#7b2a2a;border-left:6px solid #d9534f}
+
+.modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,0.4);z-index:1000}
+.modal-content{background:#fff;padding:18px;border-radius:8px;min-width:320px;max-width:420px}
+.modal-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:12px}
+
+/* Responsive */
+@media (max-width:900px){
+  .main-layout{flex-direction:column}
+  .sidebar{width:100%}
+}

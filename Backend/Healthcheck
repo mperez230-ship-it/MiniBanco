@@ -1,0 +1,12 @@
+backend:
+  build: ./backend
+  container_name: minibanco-backend
+  ports:
+    - "3001:3001"
+  networks:
+    - minibanco-net
+  healthcheck:
+    test: ["CMD", "curl", "-f", "http://localhost:3001/health"]
+    interval: 5s
+    timeout: 3s
+    retries: 5

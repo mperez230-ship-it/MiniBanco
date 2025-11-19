@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>MiniBanco - Sistema de Gestión Bancaria</title>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+<div class="container">
+  <header>
+    <h1>🏦 MiniBanco</h1>
+    <p>Sistema de Gestión Bancaria - Administra tus cuentas de forma simple y segura</p>
+  </header>
+
+  <div id="alertContainer"></div>
+
+  <div class="main-layout">
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+      
+      <!-- LOGIN -->
+      <div class="card" id="loginCard">
+        <h2>🔑 Iniciar Sesión</h2>
+        <form id="loginForm">
+          <div class="form-group">
+            <label for="loginId">Identificación *</label>
+            <input type="text" id="loginId" required placeholder="Ej: 1234567890" />
+          </div>
+          <div class="form-group">
+            <label for="loginPassword">Contraseña *</label>
+            <input type="password" id="loginPassword" required placeholder="••••••••" />
+          </div>
+          <button type="submit" class="btn btn-primary">Entrar</button>
+        </form>
+      </div>
+
+      <!-- REGISTRO -->
+      <div class="card" id="userRegistration">
+        <h2>📝 Registrar Usuario</h2>
+        <form id="userForm">
+          <div class="form-group">
+            <label for="userId">Identificación *</label>
+            <input type="text" id="userId" required placeholder="Ej: 1234567890" />
+          </div>
+          <div class="form-group">
+            <label for="userName">Nombres Completos *</label>
+            <input type="text" id="userName" required placeholder="Ej: Juan Pérez García" />
+          </div>
+          <div class="form-group">
+            <label for="userPassword">Contraseña *</label>
+            <input type="password" id="userPassword" required placeholder="••••••••" />
+          </div>
+          <button type="submit" class="btn btn-success">Registrar</button>
+        </form>
+      </div>
+
+      <!-- Información Usuario -->
+      <div class="card" id="userCard" style="display: none;">
+        <div class="user-info">
+          <h3 id="displayUserName">-</h3>
+          <p>📋 ID: <span id="displayUserId">-</span></p>
+          <p id="displayUserRole" style="font-size:0.9em;color:#666"></p>
+        </div>
+        <button class="btn btn-danger" onclick="logoutUser()">Cerrar Sesión</button>
+      </div>
+
+      <!-- Apertura de Cuenta -->
+      <div class="card" id="accountCreation" style="display: none;">
+        <h2>➕ Abrir Nueva Cuenta</h2>
+        <form id="accountForm">
+          <div class="form-group">
+            <label for="accountId">ID de la Cuenta *</label>
+            <input type="text" id="accountId" required placeholder="Ej: ACC-001" />
+          </div>
+          <div class="form-group">
+            <label for="accountType">Tipo de Cuenta *</label>
+            <select id="accountType" required>
+              <option value="">Seleccione...</option>
+              <option value="ahorro">Cuenta de Ahorro</option>
+              <option value="corriente">Cuenta Corriente</option>
+              <option value="cdt">CDT</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="initialDeposit">Depósito Inicial ($)</label>
+            <input type="number" id="initialDeposit" min="0" step="1000" placeholder="0" />
+          </div>
+          <button type="submit" class="btn btn-primary">Crear Cuenta</button>
+        </form>
+      </div>
+
+      <!-- Usuarios Registrados -->
+      <div class="card" id="usersListCard">
+        <h2>👥 Usuarios Registrados</h2>
+        <div id="usersList"></div>
+      </div>
+
+      <!-- Servicios SOAP + REST -->
+      <div class="card" id="servicesTestCard">
+        <h2>🌐 Servicios Web (SOAP + REST)</h2>
+
+        <!-- REST -->
+        <h3 style="margin-top:10px;">Tasas de Cambio (REST)</h3>
+
+        <div class="form-group">
+          <label for="currencyBase">Moneda Base</label>
+          <select id="currencyBase">
+            <option value="USD">USD - Dólar</option>
+            <option value="EUR">EUR - Euro</option>
+            <option value="COP">COP - Peso Colombiano</option>
+            <option value="GBP">GBP - Libra Esterlina</option>
+            <option value="JPY">JPY - Yen</option>
+            <option value="MXN">MXN - Peso Mexicano</option>
+          </select>
+        </div>
+
+        <button class="btn btn-info" id="restCustomBtn">Consultar REST</button>
+
+        <!-- Opcionales para conversión (si quieres usar) -->
+        <div class="form-group" style="margin-top:10px;">
+          <label for="restAmount">Cantidad a convertir</label>
+          <input type="number" id="restAmount" placeholder="Ej: 100" />
+        </div>
+        <div class="form-group">
+          <label for="restTarget">Moneda destino</label>
+          <select id="restTarget"><!-- se llenará desde script --></select>
+        </div>
+        <div id="convertResult" style="margin-top:8px;font-size:0.95em;"></div>
+
+        <hr style="margin:15px 0;">
+
+        <!-- SOAP -->
+        <h3>Suma SOAP Personalizada</h3>
+
+        <form id="soapForm">
+          <div class="form-group">
+            <label for="soapInputA">Número A</label>
+            <input type="number" id="soapInputA" required placeholder="Ej: 12" />
+          </div>
+
+          <div class="form-group">
+            <label for="soapInputB">Número B</label>
+            <input type="number" id="soapInputB" required placeholder="Ej: 8" />
+          </div>
+
+          <button type="submit" class="btn btn-warning">Calcular Suma SOAP</button>
+        </form>
+
+        <div id="soapOutput" style="margin-top:10px;font-size:0.9em;color:#333;"></div>
+
+        <hr style="margin:15px 0;">
+
+        <div id="serviceResult"></div>
+      </div>
+    </div>
+
+    <!-- CONTENIDO PRINCIPAL -->
+    <div class="card content-card">
+      <div id="welcomeMessage">
+        <div class="empty-state">
+          <h2>👋 Bienvenido a MiniBanco</h2>
+          <p style="margin-top: 15px; font-size: 1.1em;">
+            Por favor, inicia sesión o registra un nuevo usuario para comenzar
+          </p>
+        </div>
+      </div>
+
+      <div id="mainContent" style="display: none;">
+        <h2>💳 Mis Cuentas Bancarias</h2>
+
+        <!-- Tabs -->
+        <div class="tabs">
+          <button class="tab active" onclick="switchTab(event, 'cuentas')">Cuentas</button>
+          <button class="tab" onclick="switchTab(event, 'movimientos')">Movimientos</button>
+          <button class="tab" onclick="switchTab(event, 'estadisticas')">Estadísticas</button>
+        </div>
+
+        <!-- Tab: Cuentas -->
+        <div id="tab-cuentas" class="tab-content active">
+          <div id="accountsList"></div>
+        </div>
+
+        <!-- Tab: Movimientos -->
+        <div id="tab-movimientos" class="tab-content">
+          <div class="form-group">
+            <label for="filterAccount">Filtrar por Cuenta</label>
+            <select id="filterAccount" onchange="filterTransactions()">
+              <option value="all">Todas las cuentas</option>
+            </select>
+          </div>
+          <div class="transaction-list" id="transactionsList"></div>
+        </div>
+
+        <!-- Tab: Estadísticas -->
+        <div id="tab-estadisticas" class="tab-content">
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-number" id="totalAccounts">0</div>
+              <div class="stat-label">Cuentas Activas</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-number" id="totalBalance">$0</div>
+              <div class="stat-label">Saldo Total</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-number" id="totalTransactions">0</div>
+              <div class="stat-label">Transacciones</div>
+            </div>
+          </div>
+
+          <h3 style="margin-top: 30px; color: #1e3c72;">Resumen por Cuenta</h3>
+          <div id="accountSummary" style="margin-top: 20px;"></div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Transacción -->
+<div id="transactionModal" class="modal">
+  <div class="modal-content">
+    <h2 id="modalTitle" class="modal-title">Realizar Transacción</h2>
+    <form id="transactionForm">
+      <input type="hidden" id="transAccId" />
+      <input type="hidden" id="transType" />
+      <div class="form-group">
+        <label>Cuenta</label>
+        <input type="text" id="transAccDisplay" readonly style="background: #f0f0f0;" />
+      </div>
+      <div class="form-group">
+        <label for="transAmount">Monto ($) *</label>
+        <input type="number" id="transAmount" required min="1000" step="1000" placeholder="Ingrese el monto" />
+      </div>
+      <div class="modal-actions">
+        <button type="submit" class="btn btn-success">Confirmar</button>
+        <button type="button" class="btn btn-danger" onclick="closeModal()">Cancelar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Script principal -->
+<script src="script.js"></script>
+</body>
+</html>
