@@ -3,7 +3,9 @@ const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
 const DB_NAME = process.env.DB_NAME || 'minibanco_sql';
 
-// MODELOS
+/* ============================================================
+   MODELO USER
+============================================================ */
 const User = sequelize.define('User', {
   id: { type: DataTypes.STRING, primaryKey: true },
   name: { type: DataTypes.STRING, allowNull: false },
@@ -15,8 +17,15 @@ const User = sequelize.define('User', {
   timestamps: false
 });
 
+/* ============================================================
+   MODELO ACCOUNT
+============================================================ */
 const Account = sequelize.define('Account', {
   id: { type: DataTypes.STRING, primaryKey: true },
+
+  // 🔥 IMPORTANTE: Este campo faltaba
+  userId: { type: DataTypes.STRING, allowNull: false },
+
   type: { type: DataTypes.ENUM('ahorro','corriente','cdt'), allowNull: false },
   balance: { type: DataTypes.FLOAT, defaultValue: 0 },
   createdAtText: { type: DataTypes.STRING, allowNull: false }
@@ -25,8 +34,12 @@ const Account = sequelize.define('Account', {
   timestamps: false
 });
 
+/* ============================================================
+   MODELO TRANSACTION
+============================================================ */
 const Transaction = sequelize.define('Transaction', {
-  id: { type: DataTypes.BIGINT, primaryKey: true },
+  id: { type: DataTypes.BIGINT, autoIncrement: true, primaryKey: true },
+
   accountId: { type: DataTypes.STRING, allowNull: false },
   type: { type: DataTypes.ENUM('consignacion','retiro'), allowNull: false },
   amount: { type: DataTypes.FLOAT, allowNull: false },
@@ -37,14 +50,34 @@ const Transaction = sequelize.define('Transaction', {
   timestamps: false
 });
 
-// RELACIONES
-User.hasMany(Account, { foreignKey: 'userId', sourceKey: 'id', onDelete: 'CASCADE' });
-Account.belongsTo(User, { foreignKey: 'userId', targetKey: 'id' });
+/* ============================================================
+   RELACIONES
+============================================================ */
+User.hasMany(Account, {
+  foreignKey: 'userId',
+  sourceKey: 'id',
+  onDelete: 'CASCADE'
+});
 
-Account.hasMany(Transaction, { foreignKey: 'accountId', sourceKey: 'id', onDelete: 'CASCADE' });
-Transaction.belongsTo(Account, { foreignKey: 'accountId', targetKey: 'id' });
+Account.belongsTo(User, {
+  foreignKey: 'userId',
+  targetKey: 'id'
+});
 
-// CREAR DB AUTOMÁTICAMENTE
+Account.hasMany(Transaction, {
+  foreignKey: 'accountId',
+  sourceKey: 'id',
+  onDelete: 'CASCADE'
+});
+
+Transaction.belongsTo(Account, {
+  foreignKey: 'accountId',
+  targetKey: 'id'
+});
+
+/* ============================================================
+   CREAR DATABASE SI NO EXISTE
+============================================================ */
 async function createDatabaseIfNotExists() {
   const mysql = require('mysql2/promise');
 
@@ -61,7 +94,9 @@ async function createDatabaseIfNotExists() {
   console.log(`📦 Database checked/created: ${DB_NAME}`);
 }
 
-// SINCRONIZAR BASE + TABLAS
+/* ============================================================
+   SINCRONIZAR TABLAS
+============================================================ */
 async function syncDatabase() {
   try {
     await createDatabaseIfNotExists();
