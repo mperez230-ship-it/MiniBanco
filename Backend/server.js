@@ -19,20 +19,20 @@ const attachSoap = require('./soapService');
 const app = express();
 app.use(express.json());
 
-// 🔥 CORS CORREGIDO - Acepta cualquier origen en desarrollo
+// 🔥 CORS: permitir todos los orígenes (necesario para Render)
 app.use(cors({
   origin: '*',
   methods: ['GET','POST','PUT','DELETE'],
   credentials: true
 }));
 
-// Ruta Healthcheck
+// Health check
 app.get('/health', (req, res) => res.json({ status: 'ok' }));
 
-// Sincronizar MySQL antes de aceptar peticiones
+// Sincronizar MySQL
 syncDatabase();
 
-// Rutas
+// Rutas API
 app.post('/api/login', require('./controllers_sql/userController').login);
 
 app.use('/api/users', userRoutes);
@@ -40,6 +40,7 @@ app.use('/api/accounts', accountRoutes);
 app.use('/api/transactions', transactionRoutes);
 app.use('/api/external', externalRoutes);
 
+// Ruta raíz
 app.get('/', (req, res) => {
   res.json({
     ok: true,
@@ -57,18 +58,21 @@ app.get('/', (req, res) => {
   });
 });
 
-// Error handler
+// Error global
 app.use((err, req, res, next) => {
   console.error('Unhandled error:', err);
   res.status(500).json({ error: 'Error interno del servidor' });
 });
 
+// Servidor HTTP + SOAP
 const server = http.createServer(app);
 attachSoap(server);
 
+// Puerto dinámico (Render)
 const PORT = process.env.PORT || 3001;
+
 server.listen(PORT, '0.0.0.0', () => {
-  console.log(`🚀 MiniBanco SQL running at http://localhost:${PORT}`);
-  console.log(`📊 Health check: http://localhost:${PORT}/health`);
-  console.log(`📋 API Base: http://localhost:${PORT}/api`);
+  console.log(`🚀 MiniBanco SQL running on port ${PORT}`);
+  console.log(`📊 Health check: /health`);
+  console.log(`📋 API Base: /api`);
 });
