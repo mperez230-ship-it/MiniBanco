@@ -47,7 +47,7 @@
 
   <service name="MiniBancoService">
     <port name="MiniBancoPort" binding="tns:MiniBancoBinding">
-      <soap:address location="http://localhost:3001/wsdl"/>
+      <soap:address location="https://minibanco-x5nd.onrender.com/wsdl"/>
     </port>
   </service>
 </definitions>
