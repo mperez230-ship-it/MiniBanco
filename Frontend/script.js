@@ -1,5 +1,5 @@
 // CONFIG / ESTADO GLOBAL
-const API_BASE = "https://minibanco-x5nd.onrender.com";
+const API_BASE = "https://minibanco-x5nd.onrender.com/api";
 
 let currentUser = null;
 let accounts = [];
