@@ -1,7 +1,6 @@
 // backend/models_sql/index.js
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
-const DB_NAME = process.env.DB_NAME || 'minibanco_sql';
 
 /* ============================================================
    MODELO USER
@@ -10,7 +9,7 @@ const User = sequelize.define('User', {
   id: { type: DataTypes.STRING, primaryKey: true },
   name: { type: DataTypes.STRING, allowNull: false },
   password: { type: DataTypes.STRING, allowNull: false },
-  role: { type: DataTypes.ENUM('user','admin'), defaultValue: 'user' },
+  role: { type: DataTypes.ENUM('user', 'admin'), defaultValue: 'user' },
   createdAt: { type: DataTypes.DATE, defaultValue: DataTypes.NOW }
 }, {
   tableName: 'users',
@@ -23,10 +22,10 @@ const User = sequelize.define('User', {
 const Account = sequelize.define('Account', {
   id: { type: DataTypes.STRING, primaryKey: true },
 
-  // 🔥 IMPORTANTE: Este campo faltaba
+  // IMPORTANTE: Campo que faltaba
   userId: { type: DataTypes.STRING, allowNull: false },
 
-  type: { type: DataTypes.ENUM('ahorro','corriente','cdt'), allowNull: false },
+  type: { type: DataTypes.ENUM('ahorro', 'corriente', 'cdt'), allowNull: false },
   balance: { type: DataTypes.FLOAT, defaultValue: 0 },
   createdAtText: { type: DataTypes.STRING, allowNull: false }
 }, {
@@ -41,7 +40,7 @@ const Transaction = sequelize.define('Transaction', {
   id: { type: DataTypes.BIGINT, autoIncrement: true, primaryKey: true },
 
   accountId: { type: DataTypes.STRING, allowNull: false },
-  type: { type: DataTypes.ENUM('consignacion','retiro'), allowNull: false },
+  type: { type: DataTypes.ENUM('consignacion', 'retiro'), allowNull: false },
   amount: { type: DataTypes.FLOAT, allowNull: false },
   date: { type: DataTypes.STRING, allowNull: false },
   description: { type: DataTypes.STRING }
@@ -51,7 +50,7 @@ const Transaction = sequelize.define('Transaction', {
 });
 
 /* ============================================================
-   RELACIONES
+   RELACIONES ENTRE MODELOS
 ============================================================ */
 User.hasMany(Account, {
   foreignKey: 'userId',
@@ -76,34 +75,24 @@ Transaction.belongsTo(Account, {
 });
 
 /* ============================================================
-   CREAR DATABASE SI NO EXISTE
-============================================================ */
-async function createDatabaseIfNotExists() {
-  const mysql = require('mysql2/promise');
-
-  const connection = await mysql.createConnection({
-    host: process.env.DB_HOST || 'localhost',
-    user: process.env.DB_USER || 'root',
-    password: process.env.DB_PASS || '',
-    port: process.env.DB_PORT || 3306
-  });
-
-  await connection.query(`CREATE DATABASE IF NOT EXISTS \`${DB_NAME}\`;`);
-  await connection.end();
-
-  console.log(`📦 Database checked/created: ${DB_NAME}`);
-}
-
-/* ============================================================
-   SINCRONIZAR TABLAS
+   SINCRONIZAR BASE (AJUSTADO PARA RENDER + RAILWAY)
 ============================================================ */
 async function syncDatabase() {
   try {
-    await createDatabaseIfNotExists();
+    // Detectar producción (Render)
+    const isProduction = process.env.RENDER || process.env.NODE_ENV === 'production';
+
+    // Railway NO permite crear DB → solo local
+    if (!isProduction) {
+      console.log('📦 Local mode: Database auto-creation enabled');
+    } else {
+      console.log('🌐 Production mode: Skipping DB creation (Railway restricts it)');
+    }
 
     await sequelize.authenticate();
     console.log('✅ MySQL connected.');
 
+    // Crea tablas si no existen
     await sequelize.sync({ alter: true });
     console.log('✅ Tables synchronized.');
   } catch (err) {
